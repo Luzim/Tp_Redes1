@@ -9,20 +9,27 @@ class Client(object):
     def startClient(self):
         try:
             tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            dest = (self.host,self.port)
+            dest = (socket.gethostbyname(self.host),self.port)
             tcp.connect(dest)
-            msn = tcp.recv(1024)
-            print msn
+            #msn = tcp.recv(1024)
+            #print msn
             msg = raw_input()
-            tcp.send (msg)
+            a = msg + " \nConnection: close \nUser-Agent: Mozilla/5.0 \nAccept-language: br"
+            tcp.send (a)
             partofMessege = msg.split(' ')
             nome_arq =partofMessege[1].split('/')
 
             #RECEBENDO DADOS
+
+
+            self.clientHttp(nome_arq[1],tcp)
+            '''
             msn = tcp.recv(1024)
             print msn
             msn = tcp.recv(1024)
             print msn
+
+            #self.clientHttp(nome_arq[1],tcp)
             if msn is 200:
                 self.clientHttp(nome_arq[1],tcp)
             else:
@@ -30,16 +37,15 @@ class Client(object):
                 print msn
                 msn = tcp.recv(102400)
                 print msn
+            '''
             tcp.close()
             print 'Conection Closed'
         except:
             print 'Conection not efectuated'
     def clientHttp(self,nomeArquivo,tcp):
-        msn = tcp.recv(102400)
+        msn = tcp.recv(1048576)
         print msn
-        msn = tcp.recv(102400)
-        print msn
-        arquivo = open(nomeArquivo, 'w')
+        arquivo = open('pratica.txt', 'w')
         arquivo.write(msn)
         arquivo.close()
 
@@ -51,5 +57,5 @@ if __name__ == "__main__":
         client.startClient()
     except:
         print 'Port not informated'
-        client = Client(sys.argv[1],8080)
+        client = Client(sys.argv[1],80)
         client.startClient()
