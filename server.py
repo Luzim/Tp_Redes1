@@ -2,40 +2,51 @@
 import socket
 import os
 import sys
-
+from netifaces import interfaces, ifaddresses, AF_INET
 class SimpleHTTP(object):
     def _doGET(self,objeto,caminho,con):
         try:
-            f=open(caminho+objeto)
+            if objeto == '/':
+                f=open(caminho+'/index.html','r')
+                aux =f.read()
+                response_headers = {
+                'Content-Type': 'html; encoding=utf8',
+                'Content-Length': len(aux),
+                'Connection': 'close',
+                }
+                response_headers_raw = ''.join('%s: %s\n' % (k, v) for k, v in response_headers.iteritems())
+                response_proto = '\nHTTP/1.1'
+                response_status = 200
+                response_status_text = ' OK'
+                con.send('%s %s %s'%(response_proto,response_status,response_status_text)+response_headers_raw+'\r\n'+aux)
+            else:
+                f=open(caminho+objeto,'r')
+                aux =f.read()
+                response_headers = {
+                'Content-Type': 'html; encoding=utf8',
+                'Content-Length': len(aux),
+                'Connection': 'close',
+                }
+                response_headers_raw = ''.join('%s: %s\n' % (k, v) for k, v in response_headers.iteritems())
+                response_proto = '\nHTTP/1.1'
+                response_status = 200
+                response_status_text = ' OK'
+                con.send('%s %s %s'%(response_proto,response_status,response_status_text)+response_headers_raw+'\r\n'+aux)
+        except IOError:
+            response_proto = '\nHTTP/1.1'
+            response_status = 404
+            response_status_text = ' File not Found'
+
+            f=open(caminho+'/404ERROR.html','r')
             aux =f.read()
             response_headers = {
-            'Content-Type': 'text/html; encoding=utf8',
+            'Content-Type': 'html; encoding=utf8',
             'Content-Length': len(aux),
             'Connection': 'close',
             }
             response_headers_raw = ''.join('%s: %s\n' % (k, v) for k, v in response_headers.iteritems())
-            response_proto = '\nHTTP/1.1'
-            response_status = 200
-            response_status_text = 'OK'
+            con.send('%s %s %s' % (response_proto, response_status,response_status_text)+response_headers_raw+'\r\n'+aux)
 
-            con.send('%s %s %s' % (response_proto, response_status,response_status_text))
-            con.send('\n')
-            con.send(response_headers_raw)
-            con.send(aux)
-
-        except IOError:
-            response_proto = 'HTTP/1.1'
-            response_status = 404
-            response_status_text = 'File not Found'
-
-            con.send('%s %s %s' % (response_proto, response_status,response_status_text))
-            print ('%s %s %s' % (response_proto, response_status,response_status_text))
-            '''
-            con.send('%s'%response_proto+'\n')
-            con.send('%s'%response_status+'\n')
-            con.send('%s'%response_status_text+'\n')
-            con.send('\n')
-            '''
 class Server(SimpleHTTP):
     def __init__(self,HOST,PORT):
         self.host=HOST
@@ -53,12 +64,11 @@ class Server(SimpleHTTP):
             if pid == 0:
                 tcp.close()
                 print 'Conected by', cliente
-                msn = 'Conected (HOST: '+self.host+' PORT: '+str(self.port)+')\n'
-                con.send(msn)
-                msg = con.recv(1024)
+                msg = con.recv(1048576)
                 if not msg: break
                 print cliente, msg
                 nomeArquivo=msg.split(' ')
+                print 'Nome arquivo ',nomeArquivo[1]
                 if nomeArquivo[0] == "GET":
                     self._doGET(nomeArquivo[1],DocumentRoot,con)
                 else:
@@ -69,10 +79,14 @@ class Server(SimpleHTTP):
             else:
                 con.close()
 if __name__ == "__main__":
-    DocumentRoot = "%s/arquivos/" % os.path.realpath(os.path.dirname(__file__))
+    DocumentRoot = "%s/arquivos" % os.path.realpath(os.path.dirname(__file__))
     try:
         server = Server(sys.argv[1],int(sys.argv[2]))
         server.startServer()
     except:
-        server = Server('localhost', 8080)
+        print 'Port not informated - 8080'
+        for ifaceName in interfaces():
+            addresses = [i['addr'] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr':'No IP addr'}] )]
+        server = Server(addresses[0], 8080)
+
         server.startServer()
