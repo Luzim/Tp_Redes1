@@ -18,7 +18,7 @@ class SimpleHTTP(object):
                 response_proto = '\nHTTP/1.1'
                 response_status = 200
                 response_status_text = ' OK'
-                con.send('%s %s %s'%(response_proto,response_status,response_status_text)+response_headers_raw+'\r\n'+aux)
+                con.send('%s %s %s'%(response_proto,response_status,response_status_text)+'\n'+response_headers_raw+'\r\n'+aux)
             else:
                 f=open(caminho+objeto,'r')
                 aux =f.read()
@@ -31,7 +31,7 @@ class SimpleHTTP(object):
                 response_proto = '\nHTTP/1.1'
                 response_status = 200
                 response_status_text = ' OK'
-                con.send('%s %s %s'%(response_proto,response_status,response_status_text)+response_headers_raw+'\r\n'+aux)
+                con.send('%s %s %s'%(response_proto,response_status,response_status_text)+'\n'+response_headers_raw+'\r\n'+aux)
         except IOError:
             response_proto = '\nHTTP/1.1'
             response_status = 404
