@@ -45,7 +45,7 @@ class SimpleHTTP(object):
             'Connection': 'close',
             }
             response_headers_raw = ''.join('%s: %s\n' % (k, v) for k, v in response_headers.iteritems())
-            con.send('%s %s %s' % (response_proto, response_status,response_status_text)+response_headers_raw+'\r\n'+aux)
+            con.send('%s %s %s' % (response_proto, response_status,response_status_text)+'\n'+response_headers_raw+'\r\n'+aux)
 
 class Server(SimpleHTTP):
     def __init__(self,HOST,PORT):
@@ -87,6 +87,7 @@ if __name__ == "__main__":
         print 'Port not informated - 8080'
         for ifaceName in interfaces():
             addresses = [i['addr'] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr':'No IP addr'}] )]
+        print addresses
         server = Server(addresses[0], 8080)
 
         server.startServer()

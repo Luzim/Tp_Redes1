@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
             url = http_protocol[1].split('/',1)
             ca = "/"+url[1]
-            client = Client(url[0],8443,ca)
+            client = Client(url[0],443,ca)
             client.startClient()
         elif http_protocol[0] == 'http':
 
